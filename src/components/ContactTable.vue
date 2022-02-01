@@ -1,37 +1,221 @@
 <template>
-  <table>
-    <thead>
-    <tr>
-      <th>№</th>
-      <th>Name</th>
-      <th>User Name</th>
-      <th>Email</th>
-      <th>Address</th>
-      <th>Company</th>
-      <th>Phone</th>
-      <th>Website</th>
-      <th>Edit</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr v-for="(contact, index) in $store.state.contacts" :key="contact.id">
-      <template>
-        <td v-text="index + 1"></td>
-        <td v-text="contact.name"></td>
-        <td v-text="contact.username"></td>
-        <td v-text="contact.email"></td>
-        <td v-text="contact.address.city + ', ' + contact.address.streetA"></td>
-        <td v-text="contact.company.name"></td>
-        <td v-text="contact.phone"></td>
-        <td v-text="contact.website"></td>
-        <td>
-          <button class="btn btn-warning" type="button">Edit
-          </button>
-        </td>
+  <v-card>
+    <v-card-title>
+      Contact Book
+      <v-spacer></v-spacer>
+      <v-text-field
+        v-model="$store.state.search"
+        append-icon="mdi-magnify"
+        label="Search"
+        single-line
+        hide-details
+      ></v-text-field>
+    </v-card-title>
+    <v-data-table
+      :headers="$store.state.headers"
+      :items="$store.state.contacts"
+      group-by="name[0]"
+      class="elevation-1"
+      show-group-by
+      :search="$store.state.search"
+    >
+      <template v-slot:item.name="props">
+        <v-edit-dialog
+          :return-value.sync="props.item.name"
+          large
+          persistent
+          @save="save"
+          @cancel="cancel"
+          @open="open"
+          @close="close"
+        >
+          {{ props.item.name }}
+          <template v-slot:input>
+            <v-text-field
+              v-model="props.item.name"
+              :rules="$store.state.nameRules"
+              label="Edit"
+              single-line
+              :counter="35"
+              autofocus
+            ></v-text-field>
+          </template>
+        </v-edit-dialog>
       </template>
-    </tr>
-    </tbody>
-  </table>
+      <template v-slot:item.username="props">
+        <v-edit-dialog
+          :return-value.sync="props.item.username"
+          large
+          persistent
+          @save="save"
+          @cancel="cancel"
+          @open="open"
+          @close="close"
+        >
+          <div>{{ props.item.username }}</div>
+          <template v-slot:input>
+            <div class="mt-4 text-h6">
+              Update User Name
+            </div>
+            <v-text-field
+              v-model="props.item.username"
+              :rules="$store.state.nameRules"
+              :counter="35"
+              label="Edit"
+              single-line
+              autofocus
+            ></v-text-field>
+          </template>
+        </v-edit-dialog>
+      </template>
+      <template v-slot:item.email="props">
+        <v-edit-dialog
+          :return-value.sync="props.item.email"
+          large
+          persistent
+          @save="save"
+          @cancel="cancel"
+          @open="open"
+          @close="close"
+        >
+          <div>{{ props.item.email }}</div>
+          <template v-slot:input>
+            <div class="mt-4 text-h6">
+              Update Email
+            </div>
+            <v-text-field
+              v-model="props.item.email"
+              :rules="$store.state.emailRules"
+              label="Edit"
+              single-line
+              :counter="35"
+              autofocus
+            ></v-text-field>
+          </template>
+        </v-edit-dialog>
+      </template>
+      <template v-slot:item.address.city="props">
+        <v-edit-dialog
+          :return-value.sync="props.item.address.city"
+          large
+          persistent
+          @save="save"
+          @cancel="cancel"
+          @open="open"
+          @close="close"
+        >
+          <div>{{ props.item.address.city }}</div>
+          <template v-slot:input>
+            <div class="mt-4 text-h6">
+              Update Address
+            </div>
+            <v-text-field
+              v-model="props.item.address.city"
+              :rules="$store.state.nameRules"
+              :counter="35"
+              label="Edit"
+              single-line
+              autofocus
+            ></v-text-field>
+          </template>
+        </v-edit-dialog>
+      </template>
+      <template v-slot:item.company.name="props">
+        <v-edit-dialog
+          :return-value.sync="props.item.company.name"
+          large
+          persistent
+          @save="save"
+          @cancel="cancel"
+          @open="open"
+          @close="close"
+        >
+          <div>{{ props.item.company.name }}</div>
+          <template v-slot:input>
+            <div class="mt-4 text-h6">
+              Update Company
+            </div>
+            <v-text-field
+              v-model="props.item.company.name"
+              :rules="$store.state.nameRules"
+              :counter="35"
+              label="Edit"
+              single-line
+              autofocus
+            ></v-text-field>
+          </template>
+        </v-edit-dialog>
+      </template>
+      <template v-slot:item.phone="props">
+        <v-edit-dialog
+          :return-value.sync="props.item.phone"
+          large
+          persistent
+          @save="save"
+          @cancel="cancel"
+          @open="open"
+          @close="close"
+        >
+          <div>{{ props.item.phone }}</div>
+          <template v-slot:input>
+            <div class="mt-4 text-h6">
+              Update Phone
+            </div>
+            <v-text-field
+              v-model="props.item.phone"
+              :rules="$store.state.phoneRules"
+              :counter="21"
+              label="Edit"
+              single-line
+              autofocus
+            ></v-text-field>
+          </template>
+        </v-edit-dialog>
+      </template>
+      <template v-slot:item.website="props">
+        <v-edit-dialog
+          :return-value.sync="props.item.website"
+          large
+          persistent
+          @save="save"
+          @cancel="cancel"
+          @open="open"
+          @close="close"
+        >
+          <div>{{ props.item.website }}</div>
+          <template v-slot:input>
+            <div class="mt-4 text-h6">
+              Update Website
+            </div>
+            <v-text-field
+              v-model="props.item.website"
+              :rules="$store.state.nameRules"
+              :counter="35"
+              label="Edit"
+              single-line
+              autofocus
+            ></v-text-field>
+          </template>
+        </v-edit-dialog>
+      </template>
+    </v-data-table>
+    <v-snackbar
+      v-model="$store.state.snack"
+      :timeout="3000"
+      :color="$store.state.snackColor"
+    >
+      {{ $store.state.snackText }}
+      <template v-slot:action="{ attrs }">
+        <v-btn
+          v-bind="attrs"
+          text
+          @click="$store.state.snack = false"
+        >
+          Close
+        </v-btn>
+      </template>
+    </v-snackbar>
+  </v-card>
 </template>
 
 <script>
@@ -39,6 +223,20 @@ export default {
   name: 'ContactTable',
   created () {
     this.$store.dispatch('loadDate')
+  },
+  methods: {
+    save () {
+      this.$store.commit('save')
+    },
+    cancel () {
+      this.$store.commit('cancel')
+    },
+    open () {
+      this.$store.commit('open')
+    },
+    close () {
+      this.$store.commit('close')
+    }
   }
 }
 </script>
