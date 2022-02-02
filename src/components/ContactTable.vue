@@ -4,7 +4,7 @@
       Contact Book
       <v-spacer></v-spacer>
       <v-text-field
-        v-model="$store.state.search"
+        v-model="search"
         append-icon="mdi-magnify"
         label="Search"
         single-line
@@ -12,12 +12,12 @@
       ></v-text-field>
     </v-card-title>
     <v-data-table
-      :headers="$store.state.headers"
-      :items="$store.state.contacts"
+      :headers="headers"
+      :items="contacts"
       group-by="name[0]"
       class="elevation-1"
       show-group-by
-      :search="$store.state.search"
+      :search="search"
     >
       <template v-slot:item.name="props">
         <v-edit-dialog
@@ -33,7 +33,7 @@
           <template v-slot:input>
             <v-text-field
               v-model="props.item.name"
-              :rules="$store.state.nameRules"
+              :rules="nameRules"
               label="Edit"
               single-line
               :counter="35"
@@ -59,7 +59,7 @@
             </div>
             <v-text-field
               v-model="props.item.username"
-              :rules="$store.state.nameRules"
+              :rules="nameRules"
               :counter="35"
               label="Edit"
               single-line
@@ -85,7 +85,7 @@
             </div>
             <v-text-field
               v-model="props.item.email"
-              :rules="$store.state.emailRules"
+              :rules="emailRules"
               label="Edit"
               single-line
               :counter="35"
@@ -111,7 +111,7 @@
             </div>
             <v-text-field
               v-model="props.item.address.city"
-              :rules="$store.state.nameRules"
+              :rules="nameRules"
               :counter="35"
               label="Edit"
               single-line
@@ -137,7 +137,7 @@
             </div>
             <v-text-field
               v-model="props.item.company.name"
-              :rules="$store.state.nameRules"
+              :rules="nameRules"
               :counter="35"
               label="Edit"
               single-line
@@ -163,7 +163,7 @@
             </div>
             <v-text-field
               v-model="props.item.phone"
-              :rules="$store.state.phoneRules"
+              :rules="phoneRules"
               :counter="21"
               label="Edit"
               single-line
@@ -189,7 +189,7 @@
             </div>
             <v-text-field
               v-model="props.item.website"
-              :rules="$store.state.nameRules"
+              :rules="nameRules"
               :counter="35"
               label="Edit"
               single-line
@@ -200,16 +200,16 @@
       </template>
     </v-data-table>
     <v-snackbar
-      v-model="$store.state.snack"
+      v-model="snack"
       :timeout="3000"
-      :color="$store.state.snackColor"
+      :color="snackColor"
     >
-      {{ $store.state.snackText }}
+      {{ snackText }}
       <template v-slot:action="{ attrs }">
         <v-btn
           v-bind="attrs"
           text
-          @click="$store.state.snack = false"
+          @click="snack = false"
         >
           Close
         </v-btn>
@@ -219,24 +219,88 @@
 </template>
 
 <script>
+import axios from 'axios'
+
 export default {
   name: 'ContactTable',
-  created () {
-    this.$store.dispatch('loadDate')
+  data () {
+    return {
+      search: '',
+      snack: false,
+      snackColor: '',
+      snackText: '',
+      phoneRules: [
+        v => !!v || 'Enter phone',
+        v => /^[\d|()][\d\\() -\\x]{4,21}\d$/.test(v) || 'Phone must be valid'
+      ],
+      nameRules: [
+        v => !!v || 'Enter text',
+        v => v.length <= 35 || 'Text must be less than 35 characters'
+      ],
+      emailRules: [
+        v => !!v || 'E-mail is required',
+        v => /^[\w][\w-\\.]*@[\w-]+\.[a-z]{2,4}$/i.test(v) || 'E-mail must be valid'
+      ],
+      pagination: {},
+      contacts: [],
+      headers: [
+        {
+          text: 'Name',
+          value: 'name'
+        },
+        {
+          text: 'User Name',
+          value: 'username'
+        },
+        {
+          text: 'Email',
+          value: 'email'
+        },
+        {
+          text: 'Address (city)',
+          value: 'address.city'
+        },
+        {
+          text: 'Company Name',
+          value: 'company.name'
+        },
+        {
+          text: 'Phone',
+          value: 'phone'
+        },
+        {
+          text: 'Website',
+          value: 'website'
+        }
+      ]
+    }
   },
   methods: {
     save () {
-      this.$store.commit('save')
+      this.snack = true
+      this.snackColor = 'success'
+      this.snackText = 'Data saved'
     },
     cancel () {
-      this.$store.commit('cancel')
+      this.snack = true
+      this.snackColor = 'error'
+      this.snackText = 'Canceled'
     },
     open () {
-      this.$store.commit('open')
+      this.snack = true
+      this.snackColor = 'info'
+      this.snackText = 'Dialog opened'
     },
     close () {
-      this.$store.commit('close')
+      console.log('Dialog closed')
     }
+  },
+  created () {
+    axios.get('https://demo.sibers.com/users')
+      .then(response => {
+        this.contacts = response.data
+      })
+      .catch(error => console.log(error))
   }
 }
 </script>
